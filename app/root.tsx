@@ -6,7 +6,6 @@ import {
   isRouteErrorResponse,
   type ShouldRevalidateFunction,
 } from '@remix-run/react';
-import favicon from '~/assets/favicon.svg';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
 
 export type RootLoader = typeof loader;
@@ -53,7 +52,11 @@ export function links() {
       rel: 'preconnect',
       href: 'https://shop.app',
     },
-    {rel: 'icon', type: 'image/svg+xml', href: favicon},
+    {rel: 'icon', type: 'image/png', href: '/icon.png', sizes: 'any'},
+    {rel: 'icon', type: 'image/png', href: '/pngsacredsky.png', sizes: '32x32'},
+    {rel: 'icon', type: 'image/png', href: '/pngsacredsky.png', sizes: '16x16'},
+    {rel: 'apple-touch-icon', href: '/pngsacredsky.png'},
+    {rel: 'shortcut icon', href: '/favicon.ico'},
   ];
 }
 

@@ -22,10 +22,15 @@ export default function Layout() {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>mousepadv1</title>
         <link rel="stylesheet" href={tailwindCss} />
         <link rel="stylesheet" href={resetStyles} />
         <link rel="stylesheet" href={appStyles} />
-        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/icon.png" type="image/png" sizes="any" />
+        <link rel="icon" href="/pngsacredsky.png" type="image/png" sizes="32x32" />
+        <link rel="icon" href="/pngsacredsky.png" type="image/png" sizes="16x16" />
+        <link rel="apple-touch-icon" href="/pngsacredsky.png" />
+        <link rel="shortcut icon" href="/favicon.ico" />
         <Meta />
         <Links />
       </head>

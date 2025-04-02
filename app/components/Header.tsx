@@ -48,7 +48,7 @@ export function Header({
       transition={{ duration: 0.6, type: "spring", damping: 20 }}
     >
       <motion.div 
-        className="absolute inset-0 bg-white"
+        className="absolute inset-0 bg-transparent"
         style={{ opacity }}
       />
       <div className="flex w-full items-center justify-between relative z-10">
@@ -67,11 +67,10 @@ export function Header({
               src="/pngsacredsky.png" 
               alt={shop.name} 
               className="h-16 md:h-24 w-auto"
-              initial={{ opacity: 0, height: "24px" }}
-              animate={{ opacity: 1, height: "96px" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               transition={{ 
-                duration: 0.4,
-                height: { type: "spring", stiffness: 300, damping: 25 }
+                duration: 0.4
               }}
               whileHover={{ y: -5 }}
             />
