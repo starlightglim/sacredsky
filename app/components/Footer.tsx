@@ -12,10 +12,10 @@ export function Footer({header}: FooterProps) {
   const {shop, menu} = header;
 
   return (
-    <footer className="footer text-white text-center">
+    <footer className="footer text-white text-center py-6 mt-8">
       <div className="mx-auto max-w-7xl px-4">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <p className="text-sm">&copy; {new Date().getFullYear()} {shop.name}</p>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-sm mb-4 md:mb-0">&copy; {new Date().getFullYear()} {shop.name}</p>
           <FooterMenu
             menu={menu}
             primaryDomainUrl={shop.primaryDomain.url}
@@ -37,7 +37,7 @@ function FooterMenu({
   publicStoreDomain: string;
 }) {
   return (
-    <nav className="flex gap-4 text-xs" role="navigation">
+    <nav className="flex flex-wrap justify-center gap-4 text-xs" role="navigation">
       {(menu || FALLBACK_FOOTER_MENU).items
         .filter(item => !item.title.toLowerCase().includes('search') && 
                        !item.title.toLowerCase().includes('recherche') &&

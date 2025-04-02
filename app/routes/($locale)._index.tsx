@@ -159,13 +159,13 @@ function FeaturedProduct({
       animate="visible"
       variants={containerVariants}
     >
-      <div className="grid grid-cols-12 gap-8">
-        {/* Left Column - Description and Title (Sticky) */}
+      <div className="grid grid-cols-12 gap-4 md:gap-8">
+        {/* Left Column - Description and Title - Full width on mobile, side column on desktop */}
         <motion.div 
-          className="col-span-12 md:col-span-2 lg:col-span-2"
+          className="col-span-12 order-2 md:order-1 md:col-span-2 lg:col-span-2 mb-8 md:mb-0"
           variants={itemVariants}
         >
-          <div className="sticky top-36 space-y-6">
+          <div className="md:sticky md:top-36 space-y-6">
             <motion.h1 
               className="text-xl text-gray-800"
               variants={itemVariants}
@@ -174,7 +174,7 @@ function FeaturedProduct({
             </motion.h1>
 
             <motion.div 
-              className="space-y-4 text-sm text-gray-600 max-h-[60vh] overflow-y-auto pr-2 mt-8 hide-scrollbar"
+              className="space-y-4 text-sm text-gray-600 max-h-[40vh] md:max-h-[60vh] overflow-y-auto pr-2 mt-4 md:mt-8 hide-scrollbar"
               variants={itemVariants}
             >
               {descriptionParagraphs.map((paragraph, index) => (
@@ -189,9 +189,9 @@ function FeaturedProduct({
           </div>
         </motion.div>
 
-        {/* Middle Column - Product Images (Scrollable) */}
+        {/* Middle Column - Product Images - Full width on mobile */}
         <motion.div 
-          className="col-span-12 md:col-span-8 lg:col-span-8 flex flex-col space-y-6"
+          className="col-span-12 order-1 md:order-2 md:col-span-8 lg:col-span-8 flex flex-col space-y-6 mb-8 md:mb-0"
           variants={itemVariants}
         >
           {allImages.map((image, index) => {
@@ -200,7 +200,7 @@ function FeaturedProduct({
               return (
                 <motion.div 
                   key={image.id || index} 
-                  className="h-[85vh] rounded-xl overflow-hidden flex items-center justify-center"
+                  className="h-[50vh] md:h-[85vh] rounded-xl overflow-hidden flex items-center justify-center"
                   ref={firstImageRef}
                   variants={imageVariants}
                   initial="hidden"
@@ -224,7 +224,7 @@ function FeaturedProduct({
             return (
               <motion.div 
                 key={image.id || index} 
-                className="h-[75vh] rounded-xl overflow-hidden"
+                className="h-[50vh] md:h-[75vh] rounded-xl overflow-hidden"
                 ref={imageRef}
                 initial={{ opacity: 0, y: 50 }}
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
@@ -243,7 +243,7 @@ function FeaturedProduct({
           {/* If no images are available, show a placeholder */}
           {allImages.length === 0 && (
             <motion.div 
-              className="h-[75vh] rounded-xl flex items-center justify-center bg-gray-100"
+              className="h-[50vh] md:h-[75vh] rounded-xl flex items-center justify-center bg-gray-100"
               variants={itemVariants}
             >
               <p className="text-gray-400">No product images available</p>
@@ -251,13 +251,13 @@ function FeaturedProduct({
           )}
         </motion.div>
 
-        {/* Right Column - Options, Price and Add to Cart (Sticky) */}
+        {/* Right Column - Options, Price and Add to Cart - Full width on mobile */}
         <motion.div 
-          className="col-span-12 md:col-span-2 lg:col-span-2"
+          className="col-span-12 order-3 md:col-span-2 lg:col-span-2"
           variants={itemVariants}
         >
           {/* Options and pricing in sticky container */}
-          <div className="sticky top-36 flex flex-col h-[calc(100vh-180px)]">
+          <div className="md:sticky md:top-36 md:flex md:flex-col md:h-[calc(100vh-180px)]">
             {/* Options section - scrollable if needed */}
             <motion.div 
               className="overflow-y-auto hide-scrollbar flex-grow pb-4"

@@ -63,8 +63,8 @@ export function Aside({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
           className="fixed inset-0 z-[9999]"
-          role="dialog"
-        >
+      role="dialog"
+    >
           <motion.div 
             className="fixed inset-0 bg-black/40 backdrop-blur-sm" 
             onClick={close}
@@ -99,9 +99,9 @@ export function Aside({
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
-                &times;
+            &times;
               </motion.button>
-            </header>
+        </header>
             <motion.div 
               className="flex-1 overflow-y-auto"
               initial={{ opacity: 0 }}

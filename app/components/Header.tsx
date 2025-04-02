@@ -9,6 +9,7 @@ import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/Aside';
 import {AnimatedText} from '~/components/AnimatedText';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import { CartBadge } from '~/components/CartBadge';
 
 interface HeaderProps {
   header: HeaderQuery;
@@ -51,12 +52,12 @@ export function Header({
         style={{ opacity }}
       />
       <div className="flex w-full items-center justify-between relative z-10">
-        {/* Left empty section for balance */}
-        <div className="w-1/3"></div>
+        {/* Left empty section for balance - hidden on small screens */}
+        <div className="w-1/12 md:w-1/3"></div>
         
-        {/* Center logo */}
+        {/* Center logo - larger proportion on small screens */}
         <motion.div 
-          className="flex justify-center w-1/3"
+          className="flex justify-center w-10/12 md:w-1/3"
           style={{ scale }}
           initial={{ scale: 1 }}
           transition={{ duration: 0.3 }}
@@ -65,7 +66,7 @@ export function Header({
             <motion.img 
               src="/pngsacredsky.png" 
               alt={shop.name} 
-              className="h-24 w-auto"
+              className="h-16 md:h-24 w-auto"
               initial={{ opacity: 0, height: "24px" }}
               animate={{ opacity: 1, height: "96px" }}
               transition={{ 
@@ -77,8 +78,8 @@ export function Header({
           </NavLink>
         </motion.div>
         
-        {/* Right section with cart only */}
-        <div className="flex justify-end w-1/3">
+        {/* Right section with cart only - smaller on mobile */}
+        <div className="flex justify-end w-1/12 md:w-1/3">
           <CartToggle cart={cart} />
         </div>
       </div>
@@ -114,36 +115,6 @@ function HeaderCtas({
 function HeaderMenuMobileToggle() {
   // No longer needed since we're removing the mobile menu
   return null;
-}
-
-function CartBadge({count}: {count: number | null}) {
-  const {open} = useAside();
-  const {publish, shop, cart, prevCart} = useAnalytics();
-
-  return (
-    <button
-      className="text-black/60 px-4 py-2 relative flex items-center cursor-pointer bg-transparent hover:bg-white/20 rounded-full transition-colors duration-150"
-      onClick={() => {
-        open('cart');
-        
-        publish('cart_viewed', {
-          cart,
-          prevCart,
-          shop,
-          url: window.location.href || '',
-        } as CartViewPayload);
-      }}
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="9" cy="21" r="1"></circle>
-        <circle cx="20" cy="21" r="1"></circle>
-        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-      </svg>
-      {count !== null && count > 0 && (
-        <span className="ml-2 font-medium text-black/70">{count}</span>
-      )}
-    </button>
-  );
 }
 
 function CartToggle({cart}: Pick<HeaderProps, 'cart'>) {

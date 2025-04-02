@@ -36,8 +36,8 @@ export function PageLayout({
             publicStoreDomain={publicStoreDomain}
           />
         )}
-        <main className="flex-grow pt-32">
-          <div className="page-container px-4 py-8 max-w-7xl mx-auto">
+        <main className="flex-grow pt-20 md:pt-32">
+          <div className="page-container px-4 py-4 md:py-8 max-w-7xl mx-auto">
             {children}
           </div>
         </main>
