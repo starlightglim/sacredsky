@@ -5,6 +5,7 @@ import {
   useEffect,
   useState,
 } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type AsideType = 'cart' | 'mobile' | 'closed';
 type AsideContextValue = {
@@ -53,30 +54,66 @@ export function Aside({
   }, [close, expanded]);
 
   return (
-    <div
-      aria-modal
-      className={`fixed inset-0 z-[9999] transition-opacity duration-150 ${expanded ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-      role="dialog"
-    >
-      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-all duration-150" onClick={close} />
-      <div 
-        className={`fixed inset-y-0 right-0 w-full max-w-md flex flex-col bg-white shadow-xl transform transition-transform duration-150 ${expanded ? 'translate-x-0' : 'translate-x-full'}`}
-      >
-        <header className="flex items-center justify-between border-b border-neutral-100 p-6">
-          <h3 className="text-lg font-bold tracking-tight">{heading}</h3>
-          <button 
-            className="flex items-center justify-center w-8 h-8 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors" 
-            onClick={close} 
-            aria-label="Close"
+    <AnimatePresence>
+      {expanded && (
+        <motion.div
+          key="aside-modal"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+          className="fixed inset-0 z-[9999]"
+          role="dialog"
+        >
+          <motion.div 
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm" 
+            onClick={close}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+          />
+          <motion.div 
+            className="fixed inset-y-0 right-0 w-full max-w-md flex flex-col bg-white shadow-xl"
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ 
+              type: "spring", 
+              stiffness: 300, 
+              damping: 30, 
+              duration: 0.2 
+            }}
           >
-            &times;
-          </button>
-        </header>
-        <div className="flex-1 overflow-y-auto">
-          {children}
-        </div>
-      </div>
-    </div>
+            <header className="flex items-center justify-between border-b border-neutral-100 p-6">
+              <motion.h3 
+                className="text-lg font-bold tracking-tight"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >{heading}</motion.h3>
+              <motion.button 
+                className="flex items-center justify-center w-8 h-8 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors" 
+                onClick={close} 
+                aria-label="Close"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                &times;
+              </motion.button>
+            </header>
+            <motion.div 
+              className="flex-1 overflow-y-auto"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              {children}
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 

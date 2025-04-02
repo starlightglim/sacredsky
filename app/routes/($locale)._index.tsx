@@ -1,6 +1,6 @@
 import {type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import {Await, useLoaderData, Link, useNavigate, type MetaFunction} from '@remix-run/react';
-import {Suspense} from 'react';
+import {Suspense, useEffect, useRef} from 'react';
 import {Image} from '@shopify/hydrogen';
 import {
   getSelectedProductOptions,
@@ -20,6 +20,7 @@ import type {
   FeaturedCollectionFragment,
   ProductFragment,
 } from 'storefrontapi.generated';
+import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 
 export const meta: MetaFunction = () => {
   return [{title: 'Hydrogen | Home'}];
@@ -115,63 +116,171 @@ function FeaturedProduct({
   const navigate = useNavigate();
   const {open} = useAside();
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5
+      }
+    }
+  };
+
+  const imageVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.6
+      }
+    }
+  };
+
+  const firstImageRef = useRef(null);
+  const isFirstImageInView = useInView(firstImageRef, { once: true });
+
   return (
-    <div className="max-w-7xl mx-auto px-4 pt-6 pb-24 mt-0 min-h-[calc(100vh-120px)]">
+    <motion.div 
+      className="max-w-7xl mx-auto px-4 pt-6 pb-24 mt-0 min-h-[calc(100vh-120px)]"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       <div className="grid grid-cols-12 gap-8">
         {/* Left Column - Description and Title (Sticky) */}
-        <div className="col-span-12 md:col-span-2 lg:col-span-2">
+        <motion.div 
+          className="col-span-12 md:col-span-2 lg:col-span-2"
+          variants={itemVariants}
+        >
           <div className="sticky top-36 space-y-6">
-            <h1 className="text-xl text-gray-800">
+            <motion.h1 
+              className="text-xl text-gray-800"
+              variants={itemVariants}
+            >
               {title}
-            </h1>
+            </motion.h1>
 
-            <div className="space-y-4 text-sm text-gray-600 max-h-[60vh] overflow-y-auto pr-2 mt-8">
+            <motion.div 
+              className="space-y-4 text-sm text-gray-600 max-h-[60vh] overflow-y-auto pr-2 mt-8 hide-scrollbar"
+              variants={itemVariants}
+            >
               {descriptionParagraphs.map((paragraph, index) => (
-                <p key={index}>
+                <motion.p 
+                  key={index}
+                  variants={itemVariants}
+                >
                   {paragraph}
-                </p>
+                </motion.p>
               ))}
-            </div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Middle Column - Product Images (Scrollable) */}
-        <div className="col-span-12 md:col-span-8 lg:col-span-8 flex flex-col space-y-6">
-          {allImages.map((image, index) => (
-            <div key={image.id || index} className="h-[75vh] rounded-xl overflow-hidden">
-              <Image
-                data={image}
-                sizes="(min-width: 768px) 66vw, 100vw"
-                className="w-full h-full object-contain"
-                alt={image.altText || `Product image ${index + 1}`}
-              />
-            </div>
-          ))}
+        <motion.div 
+          className="col-span-12 md:col-span-8 lg:col-span-8 flex flex-col space-y-6"
+          variants={itemVariants}
+        >
+          {allImages.map((image, index) => {
+            // If it's the first image, we want to center it and make it larger
+            if (index === 0) {
+              return (
+                <motion.div 
+                  key={image.id || index} 
+                  className="h-[85vh] rounded-xl overflow-hidden flex items-center justify-center"
+                  ref={firstImageRef}
+                  variants={imageVariants}
+                  initial="hidden"
+                  animate={isFirstImageInView ? "visible" : "hidden"}
+                  custom={index}
+                >
+                  <Image
+                    data={image}
+                    sizes="(min-width: 768px) 66vw, 100vw"
+                    className="w-full h-full object-contain"
+                    alt={image.altText || `Product image ${index + 1}`}
+                  />
+                </motion.div>
+              );
+            }
+            
+            // For other images, add scroll-triggered animations
+            const imageRef = useRef(null);
+            const isInView = useInView(imageRef, { once: true, amount: 0.3 });
+            
+            return (
+              <motion.div 
+                key={image.id || index} 
+                className="h-[75vh] rounded-xl overflow-hidden"
+                ref={imageRef}
+                initial={{ opacity: 0, y: 50 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+                transition={{ duration: 0.7, delay: 0.1 }}
+              >
+                <Image
+                  data={image}
+                  sizes="(min-width: 768px) 66vw, 100vw"
+                  className="w-full h-full object-contain"
+                  alt={image.altText || `Product image ${index + 1}`}
+                />
+              </motion.div>
+            );
+          })}
+          
           {/* If no images are available, show a placeholder */}
           {allImages.length === 0 && (
-            <div className="h-[75vh] rounded-xl flex items-center justify-center bg-gray-100">
+            <motion.div 
+              className="h-[75vh] rounded-xl flex items-center justify-center bg-gray-100"
+              variants={itemVariants}
+            >
               <p className="text-gray-400">No product images available</p>
-            </div>
+            </motion.div>
           )}
-        </div>
+        </motion.div>
 
         {/* Right Column - Options, Price and Add to Cart (Sticky) */}
-        <div className="col-span-12 md:col-span-2 lg:col-span-2">
+        <motion.div 
+          className="col-span-12 md:col-span-2 lg:col-span-2"
+          variants={itemVariants}
+        >
           {/* Options and pricing in sticky container */}
           <div className="sticky top-36 flex flex-col h-[calc(100vh-180px)]">
             {/* Options section - scrollable if needed */}
-            <div className="overflow-y-auto flex-grow pb-4">
+            <motion.div 
+              className="overflow-y-auto hide-scrollbar flex-grow pb-4"
+              variants={itemVariants}
+            >
               {/* Selected Options Display */}
               {selectedVariant?.selectedOptions?.length > 0 && (
-                <div className="flex flex-col gap-2 mb-4">
+                <motion.div 
+                  className="flex flex-col gap-2 mb-4"
+                  variants={itemVariants}
+                >
                   {selectedVariant.selectedOptions
                     .filter(option => option.value.toLowerCase() !== 'default title')
                     .map(option => (
-                      <div key={option.name} className="flex items-center gap-2">
+                      <motion.div 
+                        key={option.name} 
+                        className="flex items-center gap-2"
+                        variants={itemVariants}
+                      >
                         <span className="text-gray-800">{option.value}</span>
-                      </div>
+                      </motion.div>
                   ))}
-                </div>
+                </motion.div>
               )}
 
               {/* Color/variant selection */}
@@ -180,8 +289,15 @@ function FeaturedProduct({
                 if (option.optionValues.length === 1) return null;
 
                 return (
-                  <div key={option.name} className="space-y-2 mb-4">
-                    <div className="flex gap-2 flex-wrap">
+                  <motion.div 
+                    key={option.name} 
+                    className="space-y-2 mb-4"
+                    variants={itemVariants}
+                  >
+                    <motion.div 
+                      className="flex gap-2 flex-wrap"
+                      variants={itemVariants}
+                    >
                       {option.optionValues.map((value) => {
                         const {
                           name,
@@ -196,19 +312,24 @@ function FeaturedProduct({
                         
                         if (isDifferentProduct) {
                           return (
-                            <Link
-                              className={`w-6 h-6 rounded-full ${selected ? 'ring-2 ring-gray-400' : ''}`}
+                            <motion.div
                               key={option.name + name}
-                              prefetch="intent"
-                              preventScrollReset
-                              replace
-                              to={`/products/${handle}?${variantUriQuery}`}
-                              style={swatch?.color ? { backgroundColor: swatch.color } : undefined}
-                            />
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.95 }}
+                            >
+                              <Link
+                                className={`w-6 h-6 rounded-full block ${selected ? 'ring-2 ring-gray-400' : ''}`}
+                                prefetch="intent"
+                                preventScrollReset
+                                replace
+                                to={`/products/${handle}?${variantUriQuery}`}
+                                style={swatch?.color ? { backgroundColor: swatch.color } : undefined}
+                              />
+                            </motion.div>
                           );
                         } else {
                           return (
-                            <button
+                            <motion.button
                               type="button"
                               className={`w-6 h-6 rounded-full ${selected ? 'ring-2 ring-gray-400' : ''} ${
                                 available ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
@@ -224,51 +345,71 @@ function FeaturedProduct({
                                 }
                               }}
                               style={swatch?.color ? { backgroundColor: swatch.color } : undefined}
+                              whileHover={available ? { scale: 1.1 } : {}}
+                              whileTap={available ? { scale: 0.95 } : {}}
+                              variants={itemVariants}
                             />
                           );
                         }
                       })}
-                    </div>
-                  </div>
+                    </motion.div>
+                  </motion.div>
                 );
               })}
-            </div>
+            </motion.div>
             
             {/* Price and Add to Cart - positioned at bottom */}
-            <div className="mt-auto pt-6 border-t border-gray-100">
-              <div className="space-y-2 mb-4">
+            <motion.div 
+              className="mt-auto pt-6 border-t border-gray-100"
+              variants={itemVariants}
+            >
+              <motion.div 
+                className="space-y-2 mb-4"
+                variants={itemVariants}
+              >
                 <ProductPrice
                   price={selectedVariant?.price}
                   compareAtPrice={selectedVariant?.compareAtPrice}
                   className="text-2xl"
                 />
-                <p className="text-gray-400 text-xs">Free shipping</p>
-              </div>
+                <motion.p 
+                  className="text-gray-400 text-xs"
+                  variants={itemVariants}
+                >
+                  Free shipping
+                </motion.p>
+              </motion.div>
 
               {/* Add to cart button */}
-              <AddToCartButton
-                disabled={!selectedVariant || !selectedVariant.availableForSale}
-                onClick={() => {
-                  open('cart');
-                }}
-                lines={
-                  selectedVariant
-                    ? [
-                        {
-                          merchandiseId: selectedVariant.id,
-                          quantity: 1,
-                          selectedVariant,
-                        },
-                      ]
-                    : []
-                }
-                className="py-3 px-4 rounded-full border border-gray-300 text-gray-800 hover:bg-gray-50 transition-colors w-full text-sm"
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                variants={itemVariants}
               >
-                {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
-              </AddToCartButton>
-            </div>
+                <AddToCartButton
+                  disabled={!selectedVariant || !selectedVariant.availableForSale}
+                  onClick={() => {
+                    open('cart');
+                  }}
+                  lines={
+                    selectedVariant
+                      ? [
+                          {
+                            merchandiseId: selectedVariant.id,
+                            quantity: 1,
+                            selectedVariant,
+                          },
+                        ]
+                      : []
+                  }
+                  className="py-3 px-4 rounded-full border border-gray-300 text-gray-800 hover:bg-gray-50 transition-colors w-full text-sm"
+                >
+                  {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
+                </AddToCartButton>
+              </motion.div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       </div>
       
       <Analytics.ProductView
@@ -286,7 +427,7 @@ function FeaturedProduct({
           ],
         }}
       />
-    </div>
+    </motion.div>
   );
 }
 
