@@ -7,11 +7,11 @@ import {
 } from '@shopify/hydrogen';
 import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/Aside';
+import {AnimatedText} from '~/components/AnimatedText';
 
 interface HeaderProps {
   header: HeaderQuery;
   cart: Promise<CartApiQueryFragment | null>;
-  isLoggedIn: Promise<boolean>;
   publicStoreDomain: string;
 }
 
@@ -19,24 +19,34 @@ type Viewport = 'desktop' | 'mobile';
 
 export function Header({
   header,
-  isLoggedIn,
   cart,
   publicStoreDomain,
 }: HeaderProps) {
   const {shop, menu} = header;
+  
+  const outlineStyle = {
+    textShadow: `-1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff`,
+  };
+  
   return (
-    <header className="header">
-      <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
-        <strong>{shop.name}</strong>
-      </NavLink>
-      <HeaderMenu
-        menu={menu}
-        viewport="desktop"
-        primaryDomainUrl={header.shop.primaryDomain.url}
-        publicStoreDomain={publicStoreDomain}
-      />
-      <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
-    </header>
+    <nav className="flex flex-col items-center justify-between p-4 lg:px-6 fixed top-0 left-0 right-0 z-50 bg-transparent">
+      <div className="flex w-full items-center justify-between">
+        {/* Left empty section for balance */}
+        <div className="w-1/3"></div>
+        
+        {/* Center logo */}
+        <div className="flex justify-center w-1/3">
+          <NavLink prefetch="intent" to="/" className="flex items-center justify-center">
+            <img src="/pngsacredsky.png" alt={shop.name} className="h-24 w-auto" />
+          </NavLink>
+        </div>
+        
+        {/* Right section with cart only */}
+        <div className="flex justify-end w-1/3">
+          <CartToggle cart={cart} />
+        </div>
+      </div>
+    </nav>
   );
 }
 
@@ -51,89 +61,23 @@ export function HeaderMenu({
   viewport: Viewport;
   publicStoreDomain: HeaderProps['publicStoreDomain'];
 }) {
-  const className = `header-menu-${viewport}`;
-  const {close} = useAside();
-
-  return (
-    <nav className={className} role="navigation">
-      {viewport === 'mobile' && (
-        <NavLink
-          end
-          onClick={close}
-          prefetch="intent"
-          style={activeLinkStyle}
-          to="/"
-        >
-          Home
-        </NavLink>
-      )}
-      {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
-        if (!item.url) return null;
-
-        // if the url is internal, we strip the domain
-        const url =
-          item.url.includes('myshopify.com') ||
-          item.url.includes(publicStoreDomain) ||
-          item.url.includes(primaryDomainUrl)
-            ? new URL(item.url).pathname
-            : item.url;
-        return (
-          <NavLink
-            className="header-menu-item"
-            end
-            key={item.id}
-            onClick={close}
-            prefetch="intent"
-            style={activeLinkStyle}
-            to={url}
-          >
-            {item.title}
-          </NavLink>
-        );
-      })}
-    </nav>
-  );
+  // Keep the function but don't render menu items
+  return null;
 }
 
 function HeaderCtas({
-  isLoggedIn,
   cart,
-}: Pick<HeaderProps, 'isLoggedIn' | 'cart'>) {
+}: Pick<HeaderProps, 'cart'>) {
   return (
-    <nav className="header-ctas" role="navigation">
-      <HeaderMenuMobileToggle />
-      <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
-        <Suspense fallback="Sign in">
-          <Await resolve={isLoggedIn} errorElement="Sign in">
-            {(isLoggedIn) => (isLoggedIn ? 'Account' : 'Sign in')}
-          </Await>
-        </Suspense>
-      </NavLink>
-      <SearchToggle />
+    <div className="flex items-center">
       <CartToggle cart={cart} />
-    </nav>
+    </div>
   );
 }
 
 function HeaderMenuMobileToggle() {
-  const {open} = useAside();
-  return (
-    <button
-      className="header-menu-mobile-toggle reset"
-      onClick={() => open('mobile')}
-    >
-      <h3>☰</h3>
-    </button>
-  );
-}
-
-function SearchToggle() {
-  const {open} = useAside();
-  return (
-    <button className="reset" onClick={() => open('search')}>
-      Search
-    </button>
-  );
+  // No longer needed since we're removing the mobile menu
+  return null;
 }
 
 function CartBadge({count}: {count: number | null}) {
@@ -141,11 +85,11 @@ function CartBadge({count}: {count: number | null}) {
   const {publish, shop, cart, prevCart} = useAnalytics();
 
   return (
-    <a
-      href="/cart"
-      onClick={(e) => {
-        e.preventDefault();
+    <button
+      className="text-black/60 px-4 py-2 relative flex items-center cursor-pointer bg-transparent hover:bg-white/20 rounded-full transition-colors duration-150"
+      onClick={() => {
         open('cart');
+        
         publish('cart_viewed', {
           cart,
           prevCart,
@@ -154,8 +98,15 @@ function CartBadge({count}: {count: number | null}) {
         } as CartViewPayload);
       }}
     >
-      Cart {count === null ? <span>&nbsp;</span> : count}
-    </a>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="9" cy="21" r="1"></circle>
+        <circle cx="20" cy="21" r="1"></circle>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+      </svg>
+      {count !== null && count > 0 && (
+        <span className="ml-2 font-medium text-black/70">{count}</span>
+      )}
+    </button>
   );
 }
 
@@ -178,15 +129,6 @@ function CartBanner() {
 const FALLBACK_HEADER_MENU = {
   id: 'gid://shopify/Menu/199655587896',
   items: [
-    {
-      id: 'gid://shopify/MenuItem/461609500728',
-      resourceId: null,
-      tags: [],
-      title: 'Collections',
-      type: 'HTTP',
-      url: '/collections',
-      items: [],
-    },
     {
       id: 'gid://shopify/MenuItem/461609533496',
       resourceId: null,
@@ -226,6 +168,6 @@ function activeLinkStyle({
 }) {
   return {
     fontWeight: isActive ? 'bold' : undefined,
-    color: isPending ? 'grey' : 'black',
+    color: isPending ? 'var(--color-gray-400)' : 'inherit',
   };
 }

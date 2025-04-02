@@ -22,13 +22,14 @@ export default function Layout() {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <link rel="stylesheet" href={tailwindCss}></link>
-        <link rel="stylesheet" href={resetStyles}></link>
-        <link rel="stylesheet" href={appStyles}></link>
+        <link rel="stylesheet" href={tailwindCss} />
+        <link rel="stylesheet" href={resetStyles} />
+        <link rel="stylesheet" href={appStyles} />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="bg-[#fafaf9] text-black selection:bg-teal-300 white:bg-neutral-900 white:text-white white:selection:bg-pink-500 white:selection:text-white">
         {data ? (
           <Analytics.Provider
             cart={data.cart}

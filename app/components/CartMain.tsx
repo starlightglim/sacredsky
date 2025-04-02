@@ -3,7 +3,7 @@ import {Link} from '@remix-run/react';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/Aside';
 import {CartLineItem} from '~/components/CartLineItem';
-import {CartSummary} from './CartSummary';
+import {CartSummary} from '~/components/CartSummary';
 
 export type CartLayout = 'page' | 'aside';
 
@@ -25,43 +25,51 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
   const withDiscount =
     cart &&
     Boolean(cart?.discountCodes?.filter((code) => code.applicable)?.length);
-  const className = `cart-main ${withDiscount ? 'with-discount' : ''}`;
   const cartHasItems = cart?.totalQuantity && cart?.totalQuantity > 0;
 
   return (
-    <div className={className}>
+    <div className="h-full flex flex-col">
       <CartEmpty hidden={linesCount} layout={layout} />
-      <div className="cart-details">
-        <div aria-labelledby="cart-lines">
-          <ul>
-            {(cart?.lines?.nodes ?? []).map((line) => (
-              <CartLineItem key={line.id} line={line} layout={layout} />
-            ))}
-          </ul>
+      {cartHasItems && (
+        <div className="h-full flex flex-col">
+          <div className="flex-1 overflow-y-auto px-6">
+            <ul className="divide-y divide-gray-100">
+              {(cart?.lines?.nodes ?? []).map((line) => (
+                <CartLineItem key={line.id} line={line} layout={layout} />
+              ))}
+            </ul>
+          </div>
+          <CartSummary cart={cart} layout={layout} />
         </div>
-        {cartHasItems && <CartSummary cart={cart} layout={layout} />}
-      </div>
+      )}
     </div>
   );
 }
 
 function CartEmpty({
   hidden = false,
+  layout,
 }: {
   hidden: boolean;
   layout?: CartMainProps['layout'];
 }) {
   const {close} = useAside();
   return (
-    <div hidden={hidden}>
-      <br />
-      <p>
-        Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you
-        started!
-      </p>
-      <br />
-      <Link to="/collections" onClick={close} prefetch="viewport">
-        Continue shopping →
+    <div hidden={hidden} className="flex h-full flex-col items-center justify-center space-y-8 px-4 py-24 text-center">
+      <div className="text-5xl">🛒</div>
+      <div className="space-y-3">
+        <h2 className="text-2xl font-semibold text-gray-900">Your cart is empty</h2>
+        <p className="text-gray-500 max-w-md">
+          Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you started!
+        </p>
+      </div>
+      <Link 
+        to="/collections" 
+        onClick={close} 
+        prefetch="viewport" 
+        className="inline-block rounded-full bg-black px-8 py-4 text-center text-sm font-medium text-white hover:bg-gray-800 transition-colors"
+      >
+        Continue shopping
       </Link>
     </div>
   );

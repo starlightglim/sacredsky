@@ -8,27 +8,22 @@ interface FooterProps {
   publicStoreDomain: string;
 }
 
-export function Footer({
-  footer: footerPromise,
-  header,
-  publicStoreDomain,
-}: FooterProps) {
+export function Footer({header}: FooterProps) {
+  const {shop, menu} = header;
+
   return (
-    <Suspense>
-      <Await resolve={footerPromise}>
-        {(footer) => (
-          <footer className="footer">
-            {footer?.menu && header.shop.primaryDomain?.url && (
-              <FooterMenu
-                menu={footer.menu}
-                primaryDomainUrl={header.shop.primaryDomain.url}
-                publicStoreDomain={publicStoreDomain}
-              />
-            )}
-          </footer>
-        )}
-      </Await>
-    </Suspense>
+    <footer className="footer text-white text-center">
+      <div className="mx-auto max-w-7xl px-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <p className="text-sm">&copy; {new Date().getFullYear()} {shop.name}</p>
+          <FooterMenu
+            menu={menu}
+            primaryDomainUrl={shop.primaryDomain.url}
+            publicStoreDomain={shop.primaryDomain.url}
+          />
+        </div>
+      </div>
+    </footer>
   );
 }
 
@@ -42,75 +37,61 @@ function FooterMenu({
   publicStoreDomain: string;
 }) {
   return (
-    <nav className="footer-menu" role="navigation">
-      {(menu || FALLBACK_FOOTER_MENU).items.map((item) => {
-        if (!item.url) return null;
-        // if the url is internal, we strip the domain
-        const url =
-          item.url.includes('myshopify.com') ||
-          item.url.includes(publicStoreDomain) ||
-          item.url.includes(primaryDomainUrl)
-            ? new URL(item.url).pathname
-            : item.url;
-        const isExternal = !url.startsWith('/');
-        return isExternal ? (
-          <a href={url} key={item.id} rel="noopener noreferrer" target="_blank">
-            {item.title}
-          </a>
-        ) : (
-          <NavLink
-            end
-            key={item.id}
-            prefetch="intent"
-            style={activeLinkStyle}
-            to={url}
-          >
-            {item.title}
-          </NavLink>
-        );
-      })}
+    <nav className="flex gap-4 text-xs" role="navigation">
+      {(menu || FALLBACK_FOOTER_MENU).items
+        .filter(item => !item.title.toLowerCase().includes('search') && 
+                       !item.title.toLowerCase().includes('recherche') &&
+                       !item.title.toLowerCase().includes('catalogue') &&
+                       !item.title.toLowerCase().includes('catalog') &&
+                       !item.title.toLowerCase().includes('contact'))
+        .map((item) => {
+          if (!item.url) return null;
+          // if the url is internal, we strip the domain
+          const url =
+            item.url.includes('myshopify.com') ||
+            item.url.includes(publicStoreDomain) ||
+            item.url.includes(primaryDomainUrl)
+              ? new URL(item.url).pathname
+              : item.url;
+          const isExternal = !url.startsWith('/');
+          return isExternal ? (
+            <a href={url} key={item.id} rel="noopener noreferrer" target="_blank" className="text-gray-300 hover:text-white">
+              {item.title}
+            </a>
+          ) : (
+            <NavLink
+              end
+              key={item.id}
+              prefetch="intent"
+              style={activeLinkStyle}
+              to={url}
+              className="text-gray-300 hover:text-white"
+            >
+              {item.title}
+            </NavLink>
+          );
+        })}
     </nav>
   );
 }
 
 const FALLBACK_FOOTER_MENU = {
-  id: 'gid://shopify/Menu/199655620664',
+  id: 'footer',
   items: [
     {
-      id: 'gid://shopify/MenuItem/461633060920',
-      resourceId: 'gid://shopify/ShopPolicy/23358046264',
-      tags: [],
-      title: 'Privacy Policy',
-      type: 'SHOP_POLICY',
+      id: 'privacy',
+      title: 'Privacy',
       url: '/policies/privacy-policy',
-      items: [],
     },
     {
-      id: 'gid://shopify/MenuItem/461633093688',
-      resourceId: 'gid://shopify/ShopPolicy/23358013496',
-      tags: [],
-      title: 'Refund Policy',
-      type: 'SHOP_POLICY',
-      url: '/policies/refund-policy',
-      items: [],
+      id: 'shipping',
+      title: 'Shipping',
+      url: '/policies/shipping',
     },
     {
-      id: 'gid://shopify/MenuItem/461633126456',
-      resourceId: 'gid://shopify/ShopPolicy/23358111800',
-      tags: [],
-      title: 'Shipping Policy',
-      type: 'SHOP_POLICY',
-      url: '/policies/shipping-policy',
-      items: [],
-    },
-    {
-      id: 'gid://shopify/MenuItem/461633159224',
-      resourceId: 'gid://shopify/ShopPolicy/23358079032',
-      tags: [],
-      title: 'Terms of Service',
-      type: 'SHOP_POLICY',
+      id: 'terms',
+      title: 'Terms',
       url: '/policies/terms-of-service',
-      items: [],
     },
   ],
 };
@@ -124,6 +105,6 @@ function activeLinkStyle({
 }) {
   return {
     fontWeight: isActive ? 'bold' : undefined,
-    color: isPending ? 'grey' : 'white',
+    color: isPending ? 'var(--color-gray-400)' : 'inherit',
   };
 }

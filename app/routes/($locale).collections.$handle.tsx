@@ -9,6 +9,7 @@ import {
 import type {ProductItemFragment} from 'storefrontapi.generated';
 import {useVariantUrl} from '~/lib/variants';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import {ProductCard} from '~/components/ProductCard';
 
 export const meta: MetaFunction<typeof loader> = ({data}) => {
   return [{title: `Hydrogen | ${data?.collection.title ?? ''} Collection`}];
@@ -74,21 +75,25 @@ export default function Collection() {
   const {collection} = useLoaderData<typeof loader>();
 
   return (
-    <div className="collection">
-      <h1>{collection.title}</h1>
-      <p className="collection-description">{collection.description}</p>
-      <PaginatedResourceSection
-        connection={collection.products}
-        resourcesClassName="products-grid"
-      >
-        {({node: product, index}) => (
-          <ProductItem
-            key={product.id}
-            product={product}
-            loading={index < 8 ? 'eager' : undefined}
-          />
+    <div className="mx-auto max-w-screen-2xl px-4">
+      <div className="py-8">
+        <h1 className="text-3xl font-bold mb-4">{collection.title}</h1>
+        {collection.description && (
+          <div className="max-w-2xl mb-8 text-gray-600">{collection.description}</div>
         )}
-      </PaginatedResourceSection>
+        <PaginatedResourceSection
+          connection={collection.products}
+          resourcesClassName="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
+        >
+          {({node: product, index}) => (
+            <ProductCard
+              key={product.id}
+              product={mapToProductCardFragment(product)}
+              loading={index < 8 ? 'eager' : undefined}
+            />
+          )}
+        </PaginatedResourceSection>
+      </div>
       <Analytics.CollectionView
         data={{
           collection: {
@@ -101,36 +106,29 @@ export default function Collection() {
   );
 }
 
-function ProductItem({
-  product,
-  loading,
-}: {
-  product: ProductItemFragment;
-  loading?: 'eager' | 'lazy';
-}) {
-  const variantUrl = useVariantUrl(product.handle);
-  return (
-    <Link
-      className="product-item"
-      key={product.id}
-      prefetch="intent"
-      to={variantUrl}
-    >
-      {product.featuredImage && (
-        <Image
-          alt={product.featuredImage.altText || product.title}
-          aspectRatio="1/1"
-          data={product.featuredImage}
-          loading={loading}
-          sizes="(min-width: 45em) 400px, 100vw"
-        />
-      )}
-      <h4>{product.title}</h4>
-      <small>
-        <Money data={product.priceRange.minVariantPrice} />
-      </small>
-    </Link>
-  );
+// Helper function to map a product to the format expected by ProductCard
+function mapToProductCardFragment(product: ProductItemFragment) {
+  return {
+    id: product.id,
+    title: product.title,
+    handle: product.handle,
+    images: {
+      nodes: product.featuredImage ? [product.featuredImage] : [],
+    },
+    priceRange: {
+      minVariantPrice: product.priceRange.minVariantPrice,
+    },
+    variants: {
+      nodes: [
+        {
+          id: product.id,
+          availableForSale: true,
+          price: product.priceRange.minVariantPrice,
+          compareAtPrice: null,
+        },
+      ],
+    },
+  };
 }
 
 const PRODUCT_ITEM_FRAGMENT = `#graphql

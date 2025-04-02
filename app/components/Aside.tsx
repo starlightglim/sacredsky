@@ -6,7 +6,7 @@ import {
   useState,
 } from 'react';
 
-type AsideType = 'search' | 'cart' | 'mobile' | 'closed';
+type AsideType = 'cart' | 'mobile' | 'closed';
 type AsideContextValue = {
   type: AsideType;
   open: (mode: AsideType) => void;
@@ -55,19 +55,27 @@ export function Aside({
   return (
     <div
       aria-modal
-      className={`overlay ${expanded ? 'expanded' : ''}`}
+      className={`fixed inset-0 z-[9999] transition-opacity duration-150 ${expanded ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
       role="dialog"
     >
-      <button className="close-outside" onClick={close} />
-      <aside>
-        <header>
-          <h3>{heading}</h3>
-          <button className="close reset" onClick={close} aria-label="Close">
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-all duration-150" onClick={close} />
+      <div 
+        className={`fixed inset-y-0 right-0 w-full max-w-md flex flex-col bg-white shadow-xl transform transition-transform duration-150 ${expanded ? 'translate-x-0' : 'translate-x-full'}`}
+      >
+        <header className="flex items-center justify-between border-b border-neutral-100 p-6">
+          <h3 className="text-lg font-bold tracking-tight">{heading}</h3>
+          <button 
+            className="flex items-center justify-center w-8 h-8 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors" 
+            onClick={close} 
+            aria-label="Close"
+          >
             &times;
           </button>
         </header>
-        <main>{children}</main>
-      </aside>
+        <div className="flex-1 overflow-y-auto">
+          {children}
+        </div>
+      </div>
     </div>
   );
 }
