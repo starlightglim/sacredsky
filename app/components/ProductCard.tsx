@@ -1,16 +1,16 @@
-import {Image, Link, Money} from '@shopify/hydrogen';
+import {Image, Money} from '@shopify/hydrogen';
+import {Link} from '@remix-run/react';
 import {motion} from 'framer-motion';
-import type {ProductFragment} from 'storefrontapi.generated';
+import type {ProductItemFragment} from 'storefrontapi.generated';
 
 export function ProductCard({
   product,
 }: {
-  product: ProductFragment;
+  product: ProductItemFragment;
 }) {
-  const firstVariant = product.variants?.nodes[0];
-  const isDiscounted = firstVariant?.compareAtPrice?.amount && firstVariant?.price?.amount 
-    ? parseFloat(firstVariant.price.amount) < parseFloat(firstVariant.compareAtPrice.amount)
-    : false;
+  const minPrice = product.priceRange.minVariantPrice;
+  const maxPrice = product.priceRange.maxVariantPrice;
+  const isDiscounted = parseFloat(minPrice.amount) < parseFloat(maxPrice.amount);
 
   const cardVariants = {
     hidden: { 
@@ -55,11 +55,11 @@ export function ProductCard({
           </h3>
           <div className="flex gap-2">
             <span className="text-sm md:text-base text-gray-800 font-medium">
-              <Money data={firstVariant?.price} />
+              <Money data={minPrice} />
             </span>
-            {isDiscounted && firstVariant?.compareAtPrice && (
+            {isDiscounted && (
               <span className="text-sm md:text-base text-gray-500 line-through">
-                <Money data={firstVariant.compareAtPrice} />
+                <Money data={maxPrice} />
               </span>
             )}
           </div>

@@ -1,13 +1,14 @@
 import {Suspense} from 'react';
 import {motion} from 'framer-motion';
 import {ProductCard} from './ProductCard';
+import type {ProductItemFragment} from 'storefrontapi.generated';
 
 export function ProductGrid({
   products,
   className,
   containerClassName,
 }: {
-  products: Array<any>;
+  products: Array<ProductItemFragment>;
   className?: string;
   containerClassName?: string;
 }) {
